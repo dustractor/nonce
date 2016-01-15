@@ -1,23 +1,49 @@
 #! /usr/bin/env python3
-import pkg_resources
+import argparse
 import os
-import sys
+import sqlite3
+import time
+
 import gibi
 
 
 
 class Nonce:
+    archive_schema = """
+            create table if not exists archive (
+            id integer primary key,
+            word text,
+            unique (word) on conflict ignore );
+            create table if not exists history (
+            lastid integer
+            );"""
     matrix = gibi.Matrix()
+    cx = None
     def __init__(self,matrixfile=None):
         if not matrixfile:
             raise RuntimeError("Supply a valid path to a gibi matrix file.")
         else:
             with open(matrixfile,"rb") as f:
                 self.matrix.load(f)
+        self.archive = sqlite3.connect(matrixfile + ".db")
+        self.archive.executescript(self.archive_schema)
+        self.archive.commit()
+        list(map(print,self.archive.iterdump()))
+
+
     def __call__(self):
+        word = self.matrix.make_word()
+        lastid = self.archive.execute("insert into archive (word) values (?)",(word,)).lastrowid
+        self.archive.execute("insert into history (lastid) values (?)",(lastid,))
+        self.archive.commit()
         return self.matrix.make_word()
 
+
 if __name__ == "__main__":
-    matrixfile = os.path.abspath(pkg_resources.resource_filename(__name__,"wordlist.gibi"))
-    nonce = Nonce(matrixfile)
-    print(nonce())
+    parser = argparse.ArgumentParser(prog="nonce")
+    parser.add_argument("--matrixfile",default=os.path.expanduser("~/.nonce"))
+    parsed = parser.parse_args()
+    globals().update(**parsed.__dict__)
+    if os.path.exists(matrixfile):
+        nonce = Nonce(matrixfile)
+        print(nonce())
