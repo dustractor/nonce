@@ -1,0 +1,23 @@
+#! /usr/bin/env python3
+import pkg_resources
+import os
+import sys
+import gibi
+
+
+
+class Nonce:
+    matrix = gibi.Matrix()
+    def __init__(self,matrixfile=None):
+        if not matrixfile:
+            raise RuntimeError("Supply a valid path to a gibi matrix file.")
+        else:
+            with open(matrixfile,"rb") as f:
+                self.matrix.load(f)
+    def __call__(self):
+        return self.matrix.make_word()
+
+if __name__ == "__main__":
+    matrixfile = os.path.abspath(pkg_resources.resource_filename(__name__,"wordlist.gibi"))
+    nonce = Nonce(matrixfile)
+    print(nonce())
