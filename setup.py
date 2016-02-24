@@ -4,7 +4,7 @@ setup(
         name = "nonce",
         packages = ["nonce"],
         package_data = {"nonce":["data/*.gibi"]},
-        version = "0.0.1",
+        version = "0.0.2",
         description = "CLI for gibi",
         url = "http://github.com/dustractor/nonce",
         author = "Shams Kitz",

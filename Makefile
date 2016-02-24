@@ -1,7 +1,11 @@
 sdist:
 	python3 setup.py sdist
-	cp -R dist ~/Desktop/
+	cp dist/*.tar.gz ~/Desktop/
+	tell noncetester 'upjack'
+
+clean:
+	rm -rf dist nonce.egg-info
 
 code:
-	vim Makefile setup.py README.md nonce/__main__.py
+	vim -c 'so proj.vim'
 
